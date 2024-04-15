@@ -6,11 +6,10 @@ import org.example.pojo.User;
 import org.example.service.UserService;
 import org.example.utils.JwtUtil;
 import org.example.utils.Md5Util;
+import org.example.utils.ThreadLocalUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -60,6 +59,19 @@ public class UserController {
         }
 
         return Result.error("password is wrong");
+    }
+
+    @GetMapping("/userinfo")
+    public Result<User> userInfo(   /* @RequestHeader(name = "Authorization") String token  */  ) {
+
+//        Map<String, Object> map = JwtUtil.parseToken(token);
+//        String username = (String) map.get("username");
+
+        Map<String, Object> map = ThreadLocalUtil.get();
+        String username = (String) map.get("username");
+
+        User user = userService.findByUserName(username);
+        return Result.success(user);
     }
 
 }
