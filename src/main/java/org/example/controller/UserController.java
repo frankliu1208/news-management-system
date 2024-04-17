@@ -1,5 +1,6 @@
 package org.example.controller;
 
+
 import jakarta.validation.constraints.Pattern;
 import org.example.pojo.Result;
 import org.example.pojo.User;
@@ -7,7 +8,9 @@ import org.example.service.UserService;
 import org.example.utils.JwtUtil;
 import org.example.utils.Md5Util;
 import org.example.utils.ThreadLocalUtil;
+import org.hibernate.validator.constraints.URL;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -73,6 +76,49 @@ public class UserController {
         User user = userService.findByUserName(username);
         return Result.success(user);
     }
+
+
+    @PutMapping("/update")
+    public Result update(@RequestBody @Validated User user) {
+        userService.update(user);
+        return Result.success();
+    }
+
+    //  get the data from the query string
+    @PatchMapping("/updateAvatar")
+    public Result updateAvatar(@RequestParam @URL String avatarUrl) {
+        userService.updateAvatar(avatarUrl);
+        return Result.success();
+    }
+
+
+    @PatchMapping("/updatePwd")
+    public Result updatePwd (@RequestBody Map<String, String> params) {
+         String oldPwd = params.get("old_pwd");
+         String newPwd = params.get("new_pwd");
+         String rePwd = params.get("re_pwd");  // re-confirm password
+
+         if (!StringUtils.hasLength(oldPwd) || !StringUtils.hasLength(newPwd) || !StringUtils.hasLength(rePwd)) {
+             return Result.error("lack necessary parameter");
+         }
+
+         Map<String, Object> map = ThreadLocalUtil.get();
+         String username = (String) map.get("username");
+         User loginUser = userService.findByUserName(username);
+         if (!loginUser.getPassword().equals(Md5Util.getMD5String(oldPwd))) {
+             return Result.error("original psd is wrong");
+         }
+
+         if (! rePwd.equals(newPwd)) {
+             return Result.error("not aligned for the two new psd")
+         }
+
+         userService.updatePwd(newPwd);
+         return Result.success();
+
+
+    }
+
 
 }
 
