@@ -110,7 +110,7 @@ public class UserController {
          }
 
          if (! rePwd.equals(newPwd)) {
-             return Result.error("not aligned for the two new psd")
+             return Result.error("not aligned for the two new psd");
          }
 
          userService.updatePwd(newPwd);
